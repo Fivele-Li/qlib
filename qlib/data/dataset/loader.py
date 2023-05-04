@@ -10,7 +10,7 @@ import pandas as pd
 from typing import Tuple, Union, List
 
 from qlib.data import D
-from qlib.utils import load_dataset, init_instance_by_config, time_to_slc_point
+from qlib.utils import load_dataset, init_instance_by_config, time_to_slc_point, normalize_cache_fields
 from qlib.log import get_module_logger
 from qlib.utils.serial import Serializable
 
@@ -215,7 +215,7 @@ class QlibDataLoader(DLWParser):
             self.inst_processors if isinstance(self.inst_processors, list) else self.inst_processors.get(gp_name, [])
         )
         df = D.features(instruments, exprs, start_time, end_time, freq=freq, inst_processors=inst_processors)
-        df.columns = names
+        df.rename(columns=dict(zip(normalize_cache_fields(exprs), names)), inplace=True)
         if self.swap_level:
             df = df.swaplevel().sort_index()  # NOTE: if swaplevel, return <datetime, instrument>
         return df
